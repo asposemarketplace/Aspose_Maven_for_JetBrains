@@ -141,7 +141,7 @@ public class AsposeMavenDependenciesManager {
 
     public boolean retrieveAsposeMavenDependencies(@NotNull ProgressIndicator progressIndicator) {
     try {
-
+        AsposeMavenModuleBuilderHelper.getAsposeProjectMavenDependencies().clear();
         progressIndicator.setText("Retrieving Aspose Maven Dependencies latest artifacts...");
 
         for (AsposeJavaAPI component : AsposeMavenProject.getApiList().values()) {
