@@ -17,6 +17,7 @@ package com.aspose.wizards.maven;
 
 import com.aspose.maven.apis.artifacts.Metadata;
 import com.aspose.utils.AsposeConstants;
+import com.aspose.utils.AsposeMavenDependenciesManager;
 import com.aspose.utils.AsposeMavenUtil;
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
 import com.intellij.ide.util.EditorHelper;
@@ -25,6 +26,7 @@ import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ex.ProjectManagerEx;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -88,13 +90,13 @@ public class AsposeMavenModuleBuilderHelper {
         if (pom == null) return;
 
         try {
+            System.out.println("Creating Maven project structure ...");
             VfsUtil.createDirectories(root.getPath() + "/src/main/java");
             VfsUtil.createDirectories(root.getPath() + "/src/main/resources");
             VfsUtil.createDirectories(root.getPath() + "/src/test/java");
         } catch (IOException e) {
 
         }
-
         // execute when current dialog is closed (e.g. Project Structure)
         AsposeMavenUtil.invokeLater(project, ModalityState.NON_MODAL, new Runnable() {
             public void run() {
@@ -211,25 +213,27 @@ public class AsposeMavenModuleBuilderHelper {
 
     private void copyMavenConfigurationFiles(VirtualFile pom) {
         try {
+
+
             String projectPath = project.getBasePath();
 
-            final File workingDir = Paths.get(this.getClass().getResource("/resources/maven").toURI()).toFile();
+            final File workingDir = new File(AsposeMavenDependenciesManager.getAsposeMavenWorkSpace());
 
             String projectModulefile = projectPath + File.separator + project.getName() + ".iml";
             String projectIdea_compiler_xml = projectPath + File.separator + ".idea" + File.separator + "compiler.xml";
             String projectIdea_misc_xml = projectPath + File.separator + ".idea" + File.separator + "misc.xml";
 
-            // FileUtil.copy(new File(workingDir, "untitled.iml"), new File(projectModulefile));
-            // FileUtil.copy(new File(workingDir, "compiler.xml"), new File(projectIdea_compiler_xml));
-            // FileUtil.copy(new File(workingDir, "misc.xml"), new File(projectIdea_misc_xml));
+            FileUtil.copy(new File(workingDir, AsposeMavenDependenciesManager.intelliJMavenFiles.get(0)), new File(projectModulefile));
+            FileUtil.copy(new File(workingDir,  AsposeMavenDependenciesManager.intelliJMavenFiles.get(1)), new File(projectIdea_compiler_xml));
+            FileUtil.copy(new File(workingDir,  AsposeMavenDependenciesManager.intelliJMavenFiles.get(2)), new File(projectIdea_misc_xml));
 
-            VirtualFile vf_projectModulefile = LocalFileSystem.getInstance().findFileByPath(projectModulefile);
-            VirtualFile vf_projectIdea_compiler_xml = LocalFileSystem.getInstance().findFileByPath(projectIdea_compiler_xml);
-            VirtualFile vf_projectIdea_misc_xml = LocalFileSystem.getInstance().findFileByPath(projectIdea_misc_xml);
+            //VirtualFile vf_projectModulefile = LocalFileSystem.getInstance().findFileByPath(projectModulefile);
+            //VirtualFile vf_projectIdea_compiler_xml = LocalFileSystem.getInstance().findFileByPath(projectIdea_compiler_xml);
+           // VirtualFile vf_projectIdea_misc_xml = LocalFileSystem.getInstance().findFileByPath(projectIdea_misc_xml);
 
-            updateFileContents(project, vf_projectModulefile, new File(workingDir, "untitled.iml"));
-            updateFileContents(project, vf_projectIdea_compiler_xml, new File(workingDir, "compiler.xml"));
-            updateFileContents(project, vf_projectIdea_misc_xml, new File(workingDir, "misc.xml"));
+            //updateFileContents(project, vf_projectModulefile, new File(workingDir, "untitled.iml"));
+           // updateFileContents(project, vf_projectIdea_compiler_xml, new File(workingDir, "compiler.xml"));
+          //  updateFileContents(project, vf_projectIdea_misc_xml, new File(workingDir, "misc.xml"));
             ProjectManagerEx pm = ProjectManagerEx.getInstanceEx();
 
             pm.reloadProject(project);
@@ -239,7 +243,6 @@ public class AsposeMavenModuleBuilderHelper {
         } catch (IOException e) {
             showError(project, e);
             return;
-        } catch (URISyntaxException u) {
         } catch (Throwable e) {
         }
 

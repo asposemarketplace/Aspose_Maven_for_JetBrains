@@ -49,7 +49,7 @@ public class AsposeConstants {
     public static final String MAVEN_ARTIFACTS_RETRIEVE_FAIL="Unknown Error!\nCould not retrieve latest Aspose Maven Artifacts!";
    //advertise
 
-    private static final boolean printing_allowed = false;
+    public static boolean printing_allowed = false;
 
     public static final void println(String message) {
         if (printing_allowed) {

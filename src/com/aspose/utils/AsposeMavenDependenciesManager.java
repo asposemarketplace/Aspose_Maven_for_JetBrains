@@ -28,10 +28,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class AsposeMavenDependenciesManager {
-
 
 
     public AsposeMavenDependenciesManager() {
@@ -68,7 +69,7 @@ public class AsposeMavenDependenciesManager {
             AsposeConstants.println(productMavenInfo);
             data = (Metadata) unmarshaller.unmarshal(new StreamSource(new StringReader(productMavenInfo)));
 
-            String remoteArtifactFile = productMavenRepositoryUrl + data.getVersion() + "/" + data.getArtifactId() + "-" + data.getVersion();
+            String remoteArtifactFile = productMavenRepositoryUrl + data.getVersioning().getLatest() + "/" + data.getArtifactId() + "-" + data.getVersioning().getLatest();
 
             AsposeConstants.println(remoteArtifactFile);
             if (!remoteFileExists(remoteArtifactFile + ".jar")) {
@@ -116,10 +117,6 @@ public class AsposeMavenDependenciesManager {
     }
 
 
-
-
-
-
     /**
      * @return
      */
@@ -140,27 +137,85 @@ public class AsposeMavenDependenciesManager {
 
 
     public boolean retrieveAsposeMavenDependencies(@NotNull ProgressIndicator progressIndicator) {
-    try {
-        AsposeMavenModuleBuilderHelper.getAsposeProjectMavenDependencies().clear();
-        progressIndicator.setText("Retrieving Aspose Maven Dependencies latest artifacts...");
+        try {
+            AsposeMavenModuleBuilderHelper.getAsposeProjectMavenDependencies().clear();
+            progressIndicator.setText("Retrieving Aspose Maven Dependencies latest artifacts...");
 
-        for (AsposeJavaAPI component : AsposeMavenProject.getApiList().values()) {
+            for (AsposeJavaAPI component : AsposeMavenProject.getApiList().values()) {
 
-            if (component.is_selected()) {
-                Metadata productMavenDependency = getProductMavenDependency(component.get_mavenRepositoryURL());
-                if (productMavenDependency != null) {
-                    AsposeMavenModuleBuilderHelper.getAsposeProjectMavenDependencies().add(productMavenDependency);
+                if (component.is_selected()) {
+                    Metadata productMavenDependency = getProductMavenDependency(component.get_mavenRepositoryURL());
+                    if (productMavenDependency != null) {
+                        AsposeMavenModuleBuilderHelper.getAsposeProjectMavenDependencies().add(productMavenDependency);
+                    }
                 }
             }
+        } catch (Exception rex) {
+            return false;
         }
-    } catch (Exception rex) {
-        return false;
-    }
         if (!AsposeMavenModuleBuilderHelper.getAsposeProjectMavenDependencies().isEmpty()) {
 
             return true;
         } else {
             return false;
         }
+    }
+
+    public static boolean downloadFileFromInternet(String urlStr, String absoluteOutputFile) {
+        InputStream input;
+        int bufferSize = 4096;
+
+        try {
+
+            URL url = new URL(urlStr);
+            input = url.openStream();
+            byte[] buffer = new byte[bufferSize];
+            File f = new File(absoluteOutputFile);
+            OutputStream output = new FileOutputStream(f);
+
+
+            try {
+                int bytesRead;
+                while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {
+                    output.write(buffer, 0, bytesRead);
+
+
+                }
+
+                output.flush();
+                output.close();
+
+            } finally {
+            }
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
+    }
+
+    public static List<String> intelliJMavenFiles = new ArrayList<String>();
+
+    static {
+        intelliJMavenFiles.add("untitled.iml");
+        intelliJMavenFiles.add("compiler.xml");
+        intelliJMavenFiles.add("misc.xml");
+
+    }
+
+    public static String getAsposeMavenWorkSpace() {
+        final String RepositoryResourcesLocation = "https://raw.githubusercontent.com/asposemarketplace/Aspose_Maven_for_JetBrains/master/src/resources/maven/";
+
+        String path = "";
+        path = System.getProperty("user.home");
+        path = path + File.separator + "aspose" + File.separator + "intellijplugin" + File.separator + "maven" + File.separator;
+        File confirmPath = new File(path);
+        if (!confirmPath.exists()) {
+            new File(path).mkdirs();
+            for (String fileToDownload : intelliJMavenFiles) {
+                downloadFileFromInternet(RepositoryResourcesLocation + fileToDownload, path + fileToDownload);
+            }
+
+        }
+        return path;
     }
 }
