@@ -93,3 +93,5 @@ Below simple steps will smoothly lead to successful configuration of Aspose Mave
 *   [Download Aspose Maven for JetBrains for Manual Installation](https://plugins.jetbrains.com/plugin/7612?pr=idea_ce)
 
 *   [Video tutorial showing how to create Aspose maven based project in IntelliJ IDEA](http://youtu.be/ChlojcMrWRY)
+
+![](http://i.imgur.com/IB3pzFP.jpg)
